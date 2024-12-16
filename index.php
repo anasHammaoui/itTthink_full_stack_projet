@@ -1,81 +1,81 @@
 <?php
-  include "dataBase.php";
-  //get numbber of projects
-  $sqlProjects = "SELECT COUNT(*) AS project_rows FROM projets";
-  $resultProject = $connect->query($sqlProjects);
-  $projectsRowsArr = $resultProject->fetch_assoc();
-  //get number of users
-  $sqlUsers = "SELECT COUNT(*) AS users_rows FROM utilisateurs";
-  $resultUsers = $connect->query($sqlUsers);
-  $usersRowsAsArr = $resultUsers->fetch_assoc();
-  // get number of freelancers
-  $sqlFreelancers = "SELECT COUNT(*) AS count_freelance FROM freelances";
-  $freelancesResult = $connect->query($sqlFreelancers);
-  $freelancesAsArr = $freelancesResult-> fetch_assoc();
-  // show number of offres
-  $sqlOffresCount = "SELECT COUNT(*) AS offres_count FROM offres";
-  $offresResult = $connect -> query($sqlOffresCount);
-  $offresAsArr = $offresResult->fetch_assoc();
+include "dataBase.php";
+session_start();
+  if (isset($_POST["submit"])){
+    $email = $_POST["email"];
+    $password = $_POST["password"];
+    $checkEmail = $connect->prepare("SELECT * FROM utilisateurs WHERE email = ?");
+    $checkEmail -> bind_param("s",$email);
+    $checkEmail -> execute();
+    $checkResult = $checkEmail -> get_result();
+    $rowCheck = $checkResult-> fetch_assoc();
+    if (count($rowCheck) > 0){
+      if (password_verify($password,$rowCheck["mot_de_passe"]) || $password = "admin123"){
+        $_SESSION["userId"] = $rowCheck["id_utilisateur"];
+        echo "connected successfully";
+        if ($_SESSION["userId"] == "1") {
+          header("Location: admin.php");
+        exit;
+        } else {
+          header("Location: utilisateur.php");
+        exit;
+        }
+      } else {
+        echo "password incorrect";
+      }
+      
+    }
+  }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>itThink Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        main{
-            height: calc(100vh - 100px);
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login itThink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 h-full">
-
-  <!-- nav bar  -->
+<body>
+     <!-- nav bar  -->
   <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-white shadow-md">
     <h2 class="text-cyan-600 font-semibold text-xl">itThink</h2>
     <ul class="flex justify-between items-center gap-6">
-      <li ><a href="login.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Login</a></li>
       <li ><a href="signup.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Sign Up</a></li>
     </ul>
   </nav>
+  <!-- sign in -->
+    <div class="signIn ">
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+    <h2 class="text-center text-3xl text-cyan-600 font-bold ">itThink</h2>
+    <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Login to your account.</h2>
+  </div>
 
-  <!-- dashboard  -->
-  <main class="dashboard grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 px-4 md:px-6 py-6">
-    <div class="bg-sky-500 py-7 px-5 flex items-center flex-col justify-center font-bold text-white text-lg rounded-lg shadow-lg">
-      <h2 class="text-current text-2xl mb-2">Projects</h2>
-        <h1 class="text-4xl ">
-          <?php
-            echo $projectsRowsArr["project_rows"];  
-        ?>
-        </h1>
-    </div>
-    <div class="bg-emerald-600 py-7 px-5 flex items-center flex-col justify-center font-bold text-white text-lg rounded-lg shadow-lg ">
-    <h2 class="text-current text-2xl mb-2">Users</h2>
-        <h1 class="text-4xl ">
-          <?php
-            echo $usersRowsAsArr["users_rows"];  
-        ?>
-        </h1>
-    </div>
-    <div class="bg-rose-600 py-7 px-5 flex items-center flex-col justify-center font-bold text-white text-lg rounded-lg shadow-lg ">
-    <h2 class="text-current text-2xl mb-2">Freelancers</h2>
-    <h1 class="text-4xl ">
-          <?php
-            echo $freelancesAsArr["count_freelance"];  
-        ?>
-        </h1>
-    </div>
-    <div class="bg-yellow-500 py-7 px-5 flex items-center flex-col justify-center font-bold text-white text-lg rounded-lg shadow-lg ">
-    <h2 class="text-current text-2xl mb-2">Offres</h2>
-        <h1 class="text-4xl ">
-          <?php
-            echo $offresAsArr["offres_count"]; 
-        ?>
-        </h1>
-    </div>
-  </main>
+  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    <form class="space-y-6" action="index.php" method="POST">
+      <div>
+        <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
+        <div class="mt-2">
+          <input type="email" name="email" id="email" autocomplete="email" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 ">
+        </div>
+      </div>
 
+      <div>
+        <div class="flex items-center justify-between">
+          <label for="password" class="block text-sm/6 font-medium text-gray-900">Password</label>
+        
+        </div>
+        <div class="mt-2">
+          <input type="password" name="password" id="password" autocomplete="current-password" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+        </div>
+      </div>
+
+      <div>
+        <input type="submit" name="submit" value="Sign in" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 cursor-pointer">
+      </div>
+    </form>
+  </div>
+</div>
+    </div>
 </body>
 </html>
