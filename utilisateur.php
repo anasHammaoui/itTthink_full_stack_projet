@@ -42,20 +42,27 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
            echo "<div class='bg-green-500 text-white font-bold w-full py-4 text-center'>Project was added successfully</div>";
         }
  ?>
-  <!-- edit project -->
-  <?php
-            if (isset($_POST["editProject"])) {
-                $editedName = $_POST["edit-name"];
-                $editedDesc = $_POST["edit-desc"];
-                $editedCat = (int)$_POST["edit-cat"];
-                $editId = (int)$_POST["projectId"];
-                $editSousCat = (int)$_POST["editSousCat"];
-                $editQuery = $connect -> prepare("UPDATE projets SET titre_projet = ?, projet_description = ?, id_categorie = ?, id_sous_categorie = ? WHERE id_projet = ?");
-                $editQuery -> bind_param("sssss",$editedName,$editedDesc,$editedCat,$editSousCat,$editId);
-                $editQuery -> execute();
-                echo "<div class='bg-green-500 text-white font-bold w-full py-4 text-center'>Project was updated successfully</div>";
-            }
-          ?>
+  <!-- EDIT PROJECT -->
+   <?php
+    if (isset($_POST["editProject"])){
+        $editedName = $_POST["edit-name"];
+        $editedDesc = $_POST["edit-desc"];
+        $editCat = (int)$_POST["edit-cat"];
+        $editSubCat = (int)$_POST["editSousCat"];
+        $projetId = $_POST["projectId"];
+        $editQuery = $connect -> prepare("UPDATE projets SET titre_projet = ?,projet_description = ?, id_categorie = ?, id_sous_categorie = ? WHERE id_projet = ?");
+        $editQuery -> bind_param("sssss",$editedName, $editedDesc, $editCat, $editSubCat, $projetId );
+        $editQuery -> execute();
+        
+    }
+   ?>
+   <!-- delete projet -->
+    <?php
+        if (isset($_GET["deletePr"])){
+            $idDelete = (int)$_GET["deletePro"];
+            $queryDel = $connect -> query("DELETE FROM projets WHERE id_projet = $idDelete");
+        }
+    ?>
      <!-- nav bar  -->
   <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-white shadow-md">
     <h2 class="text-cyan-600 font-semibold text-xl">itThink</h2>
@@ -177,9 +184,20 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
   <!--  -->
       <?php
     
+   if (isset($_POST["submit_search"])){
+    $search = $_POST["search"];
+    $requet = $connect -> prepare("SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in FROM projets where  titre_projet = ?");
+    $requet -> bind_param("s",$search);
+    $requet -> execute();
+    $result = $requet -> get_result();
+    $projectsAsArr = $result -> fetch_all(MYSQLI_ASSOC);
+
+   } else{
     $projectsQuery = "SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in from projets where id_utilisateur = $sessionID";
     $getProjects = $connect -> query($projectsQuery);
     $projectsAsArr = $getProjects -> fetch_all(MYSQLI_ASSOC);
+   }
+
     for ($i = 0; $i < count($projectsAsArr); $i++){
         // categorie
         $getCat = $connect -> query("SELECT nom_categorie from categorie where id_categorie = {$projectsAsArr[$i]['id_categorie']}");
@@ -189,10 +207,16 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
         $sousCatPrint = $getSousCat -> fetch_assoc();
         echo "
         <div class='bg-gray-100 shadow-md rounded-lg p-6 relative'>
-        <div class='absolute top-0 right-0'>
+        <div class='absolute top-0 right-0 flex'>
                         <!-- Modal toggle -->
-        <i data-modal-target='edit-projet' data-modal-toggle='edit-projet' class='fa-solid fa-pen-to-square text-white bg-green-500 p-3 font-bold text-lg cursor-pointer hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm px-3 py-2 text-center ' type='i'>
+        <i data-modal-target='edit-projet' data-modal-toggle='edit-projet' class='fa-solid edit-pro fa-pen-to-square text-white bg-green-500 p-3 font-bold text-lg cursor-pointer hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm px-3 py-2 text-center mr-2' type='i'>
         </i>
+        <form action='utilisateur.php' method='GET'>
+            <input type='text' value='{$projectsAsArr[$i]['id_projet']}'  name='deletePro' class='hidden'>
+            <button type='submit' value='delete' name='deletePr' class='fa-solid fa-x text-white bg-rose-500 p-3 font-bold text-lg cursor-pointer hover:bg-rose-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm px-3 py-2 text-center '>
+            
+            </button>
+        </form>
         </div>
         <h2 class='project-title text-lg font-semibold text-gray-800 mb-2' data-id='{$projectsAsArr[$i]['id_projet']}'>{$projectsAsArr[$i]['titre_projet']}</h2>
         <p class='text-gray-600 text-sm mb-4'>
@@ -275,7 +299,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
            ?>
         </select>
                     </div>
-                        <input type="text" name="projectId" class="hidden putId">
+                        <input type="text" name="projectId" class=" putId">
                     <input type="submit" value="Edit Project" name="editProject" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 </form>
             </div>
