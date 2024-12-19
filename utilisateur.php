@@ -64,50 +64,33 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
         }
     ?>
      <!-- nav bar  -->
-  <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-white shadow-md">
+  <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-white shadow-md flex-wrap">
     <h2 class="text-cyan-600 font-semibold text-xl">itThink</h2>
     <ul class="flex justify-between items-center gap-6">
     <li ><a href="index.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Log Out</a></li>
       <li ><a href="signup.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Freelancer</a></li>
     </ul>
-  </nav>
-  <div class="page-header flex py-4 bg-slate-300 justify-between px-4 md:px-6 items-center">
+</nav>
+<div class="page-header flex flex-col gap-4 md:flex-row py-4 bg-slate-300 md:justify-between px-4 md:px-6 md:items-center">
     <!-- user name -->
-  <div class="userName  text-black  py-2 px-4 grow">
+    <div class="userName  text-black  py-2 px-4 grow">
         Good morning: 
         <span class="font-bold"><?php
             echo $getItAsArr["nom_utilisateur"];
-        ?></span>
-    </div>
-    <!-- filter -->
-    <div class="filter flex  items-center mr-7" >
-  <label for="countries" class="block mr-7 font-medium text-gray-900 ">Filter</label>
-  <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="filter">
-    <option selected>Choose a country</option>
-    <option value="cat">category</option>
-    <option value="status">status</option>
-    <option value="date">date</option>
-  </select>
-</div>
-<!-- search -->
-    <div class="search">
-        <form action="utilisateur.php" method="POST" class="flex justify-between">
-            <input type="search" name="search" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 mr-2" placeholder="Search">
-            <input type="submit" value="Search" name="submit_search" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 cursor-pointer" >
-        </form>
+            ?></span>
     </div>
     <!-- ajouter -->
      <!-- Ajouter -->
- <div class="ajouter ml-7">
-   
-
-<!-- Modal toggle -->
-<button data-modal-target="add-projet" data-modal-toggle="add-projet" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-  Add Project
-</button>
-
-<!-- Main modal -->
-<div id="add-projet" tabindex="-1" aria-hidden="true" class="hidden  overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="ajouter ml-2">
+    
+    
+    <!-- Modal toggle -->
+    <button data-modal-target="add-projet" data-modal-toggle="add-projet" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+    Add Project
+    </button>
+    
+    <!-- Main modal -->
+    <div id="add-projet" tabindex="-1" aria-hidden="true" class="hidden  overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-md max-h-full">
         <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -147,7 +130,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
                 $catName = $getCatsAsArr[$i]["nom_categorie"];
                 echo "<option value='$catId'>$catName</option>";
             }
-
+    
            ?>
         </select>
                     </div>
@@ -164,7 +147,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
                 $catName = $getCatsAsArr[$i]["nom_sous_categorie"];
                 echo "<option value='$catId'>$catName</option>";
             }
-
+    
            ?>
         </select>
                     </div>
@@ -173,9 +156,41 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
             </div>
         </div>
     </div>
-</div> 
+    </div> 
+    
+    </div>
+    <!-- filter -->
+    <div class="filter  " >
+ <form action="utilisateur.php" method="POST" class="flex  items-center mr-7">
+ <label for="countries" class="block mr-7 font-medium text-gray-900 ">Filter</label>
+  <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="catFilter">
+  <option value='*'>All</option>
+  <?php
+            #filtring by cattegorie
+            
+            $catQuery = "SELECT nom_categorie, id_categorie FROM categorie";
+            $applyQuery = $connect-> query($catQuery);
+            $catsAsValurs = $applyQuery -> fetch_all(MYSQLI_ASSOC);
 
- </div>
+            for ($i =0; $i < count($catsAsValurs); $i++){
+                $catId = $catsAsValurs[$i]["id_categorie"];
+                $catName = $catsAsValurs[$i]["nom_categorie"];
+                echo "<option value='$catId'>$catName</option>";
+             }
+           ?>
+
+  </select>
+  <input type="submit" name="filterCat" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+ </form>
+</div>
+<!-- search -->
+<!-- search -->
+    <div class="search">
+        <form action="utilisateur.php" method="POST" class="flex justify-between">
+            <input type="search" name="search" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 mr-2" placeholder="Search">
+            <input type="submit" value="Search" name="submit_search" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 cursor-pointer" >
+        </form>
+    </div>
   </div>
 
     <!-- dashboard projects  -->
@@ -184,7 +199,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
   <!--  -->
       <?php
     
-   if (isset($_POST["submit_search"])){
+   if (isset($_POST["submit_search"])){ // search by project name
     $search = $_POST["search"];
     $requet = $connect -> prepare("SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in FROM projets where  titre_projet = ?");
     $requet -> bind_param("s",$search);
@@ -192,7 +207,15 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
     $result = $requet -> get_result();
     $projectsAsArr = $result -> fetch_all(MYSQLI_ASSOC);
 
-   } else{
+   } elseif (isset($_POST["filterCat"]) && $_POST["catFilter"] !== "*") { // filter by categorie
+
+        $selectedCat =(int)$_POST["catFilter"];
+        $requet = $connect -> prepare("SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in FROM projets where  id_categorie = ?");
+        $requet -> bind_param("s",$selectedCat);
+        $requet -> execute();
+        $result = $requet -> get_result();
+        $projectsAsArr = $result -> fetch_all(MYSQLI_ASSOC);
+   } else{ // normal case show everything
     $projectsQuery = "SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in from projets where id_utilisateur = $sessionID";
     $getProjects = $connect -> query($projectsQuery);
     $projectsAsArr = $getProjects -> fetch_all(MYSQLI_ASSOC);
