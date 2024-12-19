@@ -191,7 +191,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
         <div class='bg-gray-100 shadow-md rounded-lg p-6 relative'>
         <div class='absolute top-0 right-0'>
                         <!-- Modal toggle -->
-        <i data-modal-target='edit-projet' data-modal-toggle='edit-projet' class='fa-solid fa-pen-to-square mr-2 text-white bg-green-500 p-3 font-bold text-lg cursor-pointer hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm px-3 py-2 text-center ' type='i'>
+        <i data-modal-target='edit-projet' data-modal-toggle='edit-projet' class='fa-solid fa-pen-to-square text-white bg-green-500 p-3 font-bold text-lg cursor-pointer hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm px-3 py-2 text-center ' type='i'>
         </i>
         </div>
         <h2 class='project-title text-lg font-semibold text-gray-800 mb-2' data-id='{$projectsAsArr[$i]['id_projet']}'>{$projectsAsArr[$i]['titre_projet']}</h2>
