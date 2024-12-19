@@ -1,7 +1,10 @@
 <?php
 include "dataBase.php";
+if (isset($_SESSION["role"])){
+  session_destroy();
+}
 session_start();
-  if (isset($_POST["submit"])){
+if (isset($_POST["submit"])){
     $email = $_POST["email"];
     $password = $_POST["password"];
     $checkEmail = $connect->prepare("SELECT * FROM utilisateurs WHERE email = ?");
@@ -9,11 +12,16 @@ session_start();
     $checkEmail -> execute();
     $checkResult = $checkEmail -> get_result();
     $rowCheck = $checkResult-> fetch_assoc();
-    if (count($rowCheck) > 0){
-      if (password_verify($password,$rowCheck["mot_de_passe"]) || $password = "admin123"){
+  
+    if ($checkResult->num_rows > 0){ 
+
+      if (password_verify($password,$rowCheck["mot_de_passe"])){
+       
+        echo "mot pass correct";
+        $_SESSION["role"] = $rowCheck["user_role"];
         $_SESSION["userId"] = $rowCheck["id_utilisateur"];
         echo "connected successfully";
-        if ($_SESSION["userId"] == "1") {
+        if ($_SESSION["role"] == "admin") {
           header("Location: admin.php");
         exit;
         } else {

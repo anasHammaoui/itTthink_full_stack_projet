@@ -1,10 +1,18 @@
 <?php
 include "dataBase.php";
 session_start();
-$sessionId = $_SESSION["userId"];
-$userData = "SELECT nom_utilisateur FROM utilisateurs WHERE id_utilisateur = $sessionId";
-$getData = $connect -> query($userData);
-$getItAsArr = $getData->fetch_assoc();
+if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
+    $sessionRole = $_SESSION["role"];
+    $sessionID = $_SESSION["userId"];
+    $userData = "SELECT nom_utilisateur FROM utilisateurs WHERE id_utilisateur = '{$sessionID}'";
+    $getData = $connect -> query($userData);
+    $getItAsArr = $getData->fetch_assoc();
+} else{
+    header("location: index.php");
+    exit;
+}
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,6 +28,34 @@ $getItAsArr = $getData->fetch_assoc();
 
 </head>
 <body>
+    <!-- add a project with php -->
+ <?php
+        if (isset($_POST["addProject"])) {
+            $projectName = $_POST["pr-name"];
+            $projectDesc = $_POST["pr-desc"];
+            $projectCat = $_POST["projectCat"];
+            $sousCat = $_POST["sousCat"];
+            $projectDate = date("Y-m-d H:i:s");
+            $query =$connect -> prepare("INSERT INTO projets (titre_projet, projet_description, id_categorie, id_sous_categorie, id_utilisateur, created_in) VALUES (?,?,?,?,?,?)");
+            $query -> bind_param("ssssss",$projectName,$projectDesc,$projectCat,$sousCat,$sessionID,$projectDate);
+           $query -> execute();
+           echo "<div class='bg-green-500 text-white font-bold w-full py-4 text-center'>Project was added successfully</div>";
+        }
+ ?>
+  <!-- edit project -->
+  <?php
+            if (isset($_POST["editProject"])) {
+                $editedName = $_POST["edit-name"];
+                $editedDesc = $_POST["edit-desc"];
+                $editedCat = (int)$_POST["edit-cat"];
+                $editId = (int)$_POST["projectId"];
+                $editSousCat = (int)$_POST["editSousCat"];
+                $editQuery = $connect -> prepare("UPDATE projets SET titre_projet = ?, projet_description = ?, id_categorie = ?, id_sous_categorie = ? WHERE id_projet = ?");
+                $editQuery -> bind_param("sssss",$editedName,$editedDesc,$editedCat,$editSousCat,$editId);
+                $editQuery -> execute();
+                echo "<div class='bg-green-500 text-white font-bold w-full py-4 text-center'>Project was updated successfully</div>";
+            }
+          ?>
      <!-- nav bar  -->
   <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-white shadow-md">
     <h2 class="text-cyan-600 font-semibold text-xl">itThink</h2>
@@ -38,7 +74,7 @@ $getItAsArr = $getData->fetch_assoc();
     </div>
     <!-- filter -->
     <div class="filter flex  items-center mr-7" >
-  <label for="countries" class="block mb-2 mr-7 font-medium text-gray-900 ">Filter</label>
+  <label for="countries" class="block mr-7 font-medium text-gray-900 ">Filter</label>
   <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="filter">
     <option selected>Choose a country</option>
     <option value="cat">category</option>
@@ -59,21 +95,21 @@ $getItAsArr = $getData->fetch_assoc();
    
 
 <!-- Modal toggle -->
-<button data-modal-target="authentication-modal" data-modal-toggle="authentication-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+<button data-modal-target="add-projet" data-modal-toggle="add-projet" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
   Add Project
 </button>
 
 <!-- Main modal -->
-<div id="authentication-modal" tabindex="-1" aria-hidden="true" class="hidden  overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div id="add-projet" tabindex="-1" aria-hidden="true" class="hidden  overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-md max-h-full">
         <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    Sign in to our platform
+                    Add a project
                 </h3>
-                <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="authentication-modal">
+                <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="add-projet">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                     </svg>
@@ -82,28 +118,50 @@ $getItAsArr = $getData->fetch_assoc();
             </div>
             <!-- Modal body -->
             <div class="p-4 md:p-5">
-                <form class="space-y-4" action="#">
+                <form class="space-y-4" action="utilisateur.php" method="POST">
                     <div>
-                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-                        <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="name@company.com" required />
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Project name</label>
+                        <input type="text" name="pr-name" id="pr-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter a name" required />
                     </div>
                     <div>
-                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-                        <input type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Project description</label>
+                        <textarea type="text" name="pr-desc" id="pr-desc" placeholder="Enter a description" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required ></textarea>
                     </div>
-                    <div class="flex justify-between">
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                                <input id="remember" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
-                            </div>
-                            <label for="remember" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Remember me</label>
-                        </div>
-                        <a href="#" class="text-sm text-blue-700 hover:underline dark:text-blue-500">Lost Password?</a>
+                    <!-- categorie -->
+                    <div class="flex justify-between items-center">
+                <label for="selectCat" class="block  mr-7 font-medium text-gray-900 ">Category</label>
+        <select id="selectCat" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="projectCat">
+           <?php
+            $getCats = "SELECT * FROM categorie";
+            $catQuery = $connect -> query($getCats);
+            $getCatsAsArr = $catQuery -> fetch_all(MYSQLI_ASSOC);
+            for ($i=0; $i < count($getCatsAsArr);$i++) {
+                $catId = $getCatsAsArr[$i]["id_categorie"];
+                $catName = $getCatsAsArr[$i]["nom_categorie"];
+                echo "<option value='$catId'>$catName</option>";
+            }
+
+           ?>
+        </select>
                     </div>
-                    <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login to your account</button>
-                    <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-                        Not registered? <a href="#" class="text-blue-700 hover:underline dark:text-blue-500">Create account</a>
+                    <!-- categorie -->
+                    <div class="flex justify-between items-center">
+                <label for="souCat" class="block  mr-7 font-medium text-gray-900 ">Sub category</label>
+        <select id="souCat" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="sousCat">
+           <?php
+            $getCats = "SELECT * FROM sous_categorie";
+            $catQuery = $connect -> query($getCats);
+            $getCatsAsArr = $catQuery -> fetch_all(MYSQLI_ASSOC);
+            for ($i=0; $i < count($getCatsAsArr);$i++) {
+                $catId = $getCatsAsArr[$i]["id_sous_categorie"];
+                $catName = $getCatsAsArr[$i]["nom_sous_categorie"];
+                echo "<option value='$catId'>$catName</option>";
+            }
+
+           ?>
+        </select>
                     </div>
+                    <input type="submit" value="Add Project" name="addProject" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 </form>
             </div>
         </div>
@@ -114,19 +172,118 @@ $getItAsArr = $getData->fetch_assoc();
   </div>
 
     <!-- dashboard projects  -->
-  <main class="dashboard grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 px-4 md:px-6 py-6">
-    <div class="bg-sky-500 py-7 px-5 flex items-center flex-col justify-center  text-white text-lg rounded-lg shadow-lg relative">
-        <div class="absolute top-0 right-0">
-        <i class="fa-solid fa-star "></i>
-        <i class="fa-solid fa-pen-to-square"></i>
+  <main class="dashboard mx-auto container px-4 py-10">
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+  <!--  -->
+      <?php
+    
+    $projectsQuery = "SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in from projets where id_utilisateur = $sessionID";
+    $getProjects = $connect -> query($projectsQuery);
+    $projectsAsArr = $getProjects -> fetch_all(MYSQLI_ASSOC);
+    for ($i = 0; $i < count($projectsAsArr); $i++){
+        // categorie
+        $getCat = $connect -> query("SELECT nom_categorie from categorie where id_categorie = {$projectsAsArr[$i]['id_categorie']}");
+        $catPrint = $getCat -> fetch_assoc();
+        // sub categorie
+        $getSousCat = $connect -> query("SELECT nom_sous_categorie from sous_categorie where id_sous_categorie = {$projectsAsArr[$i]['id_sous_categorie']}");
+        $sousCatPrint = $getSousCat -> fetch_assoc();
+        echo "
+        <div class='bg-gray-100 shadow-md rounded-lg p-6 relative'>
+        <div class='absolute top-0 right-0'>
+                        <!-- Modal toggle -->
+        <i data-modal-target='edit-projet' data-modal-toggle='edit-projet' class='fa-solid fa-pen-to-square mr-2 text-white bg-green-500 p-3 font-bold text-lg cursor-pointer hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm px-3 py-2 text-center ' type='i'>
+        </i>
         </div>
-      <h2 class="text-current text-2xl mb-2 font-bold">Project title</h2>
-       <p class="my-2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Illum numquam, repudiandae amet a distinctio error impedit quae quis nemo, dignissimos laudantium saepe cum optio.</p>
-      <div class="flex justify-between w-full">
-      <h2 class=" text-white font-bold">Category</h2>
-      <h2 class=" text-white font-bold">Sub Category</h2>
+        <h2 class='project-title text-lg font-semibold text-gray-800 mb-2' data-id='{$projectsAsArr[$i]['id_projet']}'>{$projectsAsArr[$i]['titre_projet']}</h2>
+        <p class='text-gray-600 text-sm mb-4'>
+         {$projectsAsArr[$i]['projet_description']}
+        </p>
+        <div class='text-sm text-gray-500'>
+          <p><strong>Category:</strong> {$catPrint['nom_categorie']}</p>
+          <p><strong>Subcategory:</strong> {$sousCatPrint['nom_sous_categorie']}</p>
+          <p><strong>Date:</strong> {$projectsAsArr[$i]['created_in']}</p>
+        </div>
       </div>
+        ";
+    }
+
+    ?>
     </div>
   </main>
+
+        
+         <div class="edit">
+<!-- Main modal -->
+<div id="edit-projet" tabindex="-1" aria-hidden="true" class="hidden  overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    edit a project
+                </h3>
+                <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="edit-projet">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5">
+                <form class="space-y-4 edit-project" action="utilisateur.php" method="POST">
+                    <div>
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Project name</label>
+                        <input type="text" name="edit-name" id="edit-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter a name" required />
+                    </div>
+                    <div>
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Project description</label>
+                        <textarea type="text" name="edit-desc" id="edit-desc" placeholder="Enter a description" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required ></textarea>
+                    </div>
+                    <div class="flex justify-between items-center">
+                       
+                <label for="selectCat" class="block  mr-7 font-medium text-gray-900 ">Category</label>
+        <select id="selectCat" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="edit-cat">
+           <?php
+            $getCats = "SELECT * FROM categorie";
+            $catQuery = $connect -> query($getCats);
+            $getCatsAsArr = $catQuery -> fetch_all(MYSQLI_ASSOC);
+            for ($i=0; $i < count($getCatsAsArr);$i++) {
+                $catId = $getCatsAsArr[$i]["id_categorie"];
+                $catName = $getCatsAsArr[$i]["nom_categorie"];
+                echo "<option value='$catId'>$catName</option>";
+            }
+
+           ?>
+        </select>
+                    </div>
+                      <!-- sub categorie -->
+                      <div class="flex justify-between items-center">
+                <label for="souCat" class="block  mr-7 font-medium text-gray-900 ">Sub category</label>
+        <select id="souCat" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="editSousCat">
+           <?php
+            $getCats = "SELECT * FROM sous_categorie";
+            $catQuery = $connect -> query($getCats);
+            $getCatsAsArr = $catQuery -> fetch_all(MYSQLI_ASSOC);
+            for ($i=0; $i < count($getCatsAsArr);$i++) {
+                $catId = $getCatsAsArr[$i]["id_sous_categorie"];
+                $catName = $getCatsAsArr[$i]["nom_sous_categorie"];
+                echo "<option value='$catId'>$catName</option>";
+            }
+
+           ?>
+        </select>
+                    </div>
+                        <input type="text" name="projectId" class="hidden putId">
+                    <input type="submit" value="Edit Project" name="editProject" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                </form>
+            </div>
+        </div>
+    </div>
+</div> 
+        </div>
+        <!-- js files -->
+        <script src="js/script.js"></script>
 </body>
 </html>

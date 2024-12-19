@@ -1,7 +1,8 @@
 <?php
   include "dataBase.php";
   session_start();
-  //get numbber of projects
+  if ($_SESSION["role"] == "admin"){
+    //get numbber of projects
   $sqlProjects = "SELECT COUNT(*) AS project_rows FROM projets";
   $resultProject = $connect->query($sqlProjects);
   $projectsRowsArr = $resultProject->fetch_assoc();
@@ -17,6 +18,10 @@
   $sqlOffresCount = "SELECT COUNT(*) AS offres_count FROM offres";
   $offresResult = $connect -> query($sqlOffresCount);
   $offresAsArr = $offresResult->fetch_assoc();
+  } else {
+    header("location: index.php");
+    exit;
+  }
 ?>
 <!DOCTYPE html>
 <html lang="en">

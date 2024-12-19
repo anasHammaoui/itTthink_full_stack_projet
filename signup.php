@@ -4,7 +4,6 @@
         $fullname = $_POST["fullName"];
         $password = password_hash($_POST["password"],PASSWORD_DEFAULT);
         $email = $_POST["email"];
-        $randIdUser = rand(1000,9999);
         // check if account is exist
         $searchBind = $connect -> prepare("SELECT COUNT(*) AS mailCount FROM utilisateurs WHERE email = ?");
         $searchBind ->  bind_param("s",$email);
@@ -14,10 +13,23 @@
         if (empty($fullname) || empty($password) || empty($email) || strlen($password) < 8 || $count["mailCount"] > 0){
             echo "<div class='bg-red-500 text-white font-bold w-full py-4 text-center'>Please check your info and try again</div>";
         } else {
-            $insertUserPrepare = $connect->prepare("INSERT INTO utilisateurs VALUES (?,?,?,?)");
-        $insertUserPrepare->bind_param("ssss",$randIdUser, $fullname, $password, $email);
-        $insertUserPrepare->execute();
-        echo "<div class='bg-green-500 text-white font-bold w-full py-4 text-center'>Account created succesfully</div>";
+           $countUsers = $connect -> query("SELECT count(*) as users FROM utilisateurs");
+           $usersAsArr = $countUsers -> fetch_assoc();
+           $coutUsersInt = (int)$usersAsArr["users"];
+
+           if ($coutUsersInt == 0){
+            $admin = "admin";
+            $insertUserPrepare = $connect->prepare("INSERT INTO utilisateurs (nom_utilisateur, mot_de_passe, email, user_role)  VALUES (?,?,?,?)");
+            $insertUserPrepare->bind_param("ssss", $fullname, $password, $email, $admin);
+            $insertUserPrepare->execute();
+            echo "<div class='bg-green-500 text-white font-bold w-full py-4 text-center'>Account created succesfully</div>";
+           } else {
+            $users = "client";
+            $insertUserPrepare = $connect->prepare("INSERT INTO utilisateurs (nom_utilisateur, mot_de_passe, email, user_role)  VALUES (?,?,?,?)");
+            $insertUserPrepare->bind_param("ssss", $fullname, $password, $email, $users);
+            $insertUserPrepare->execute();
+            echo "<div class='bg-green-500 text-white font-bold w-full py-4 text-center'>Account created succesfully</div>";
+           }
         }
     }
     
@@ -35,8 +47,7 @@
   <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-white shadow-md">
     <h2 class="text-cyan-600 font-semibold text-xl">itThink</h2>
     <ul class="flex justify-between items-center gap-6">
-      <li ><a href="index.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Dashboard</a></li>
-      <li ><a href="login.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Sign In</a></li>
+      <li ><a href="index.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Sign In</a></li>
     </ul>
   </nav>
   <!-- sign up -->
