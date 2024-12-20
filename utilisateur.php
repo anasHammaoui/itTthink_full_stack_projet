@@ -161,9 +161,9 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
     </div>
     <!-- filter -->
     <div class="filter  " >
- <form action="utilisateur.php" method="POST" class="flex  items-center mr-7">
- <label for="countries" class="block mr-7 font-medium text-gray-900 ">Filter</label>
-  <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="catFilter">
+ <form action="utilisateur.php" method="POST" class="flex  items-center mr-7                 ">
+ <label for="category" class="block mr-7 font-medium text-gray-900 ">Filter</label>
+  <select id="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="catFilter">
   <option value='*'>All</option>
   <?php
             #filtring by cattegorie
@@ -216,9 +216,9 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
         $result = $requet -> get_result();
         $projectsAsArr = $result -> fetch_all(MYSQLI_ASSOC);
    } else{ // normal case show everything
-    $projectsQuery = "SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in from projets where id_utilisateur = $sessionID";
-    $getProjects = $connect -> query($projectsQuery);
-    $projectsAsArr = $getProjects -> fetch_all(MYSQLI_ASSOC);
+        $projectsQuery = "SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in from projets where id_utilisateur = $sessionID";
+        $getProjects = $connect -> query($projectsQuery);
+        $projectsAsArr = $getProjects -> fetch_all(MYSQLI_ASSOC);
    }
 
     for ($i = 0; $i < count($projectsAsArr); $i++){
