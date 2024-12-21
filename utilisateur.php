@@ -34,12 +34,13 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
             $projectName = $_POST["pr-name"];
             $projectDesc = $_POST["pr-desc"];
             $projectCat = $_POST["projectCat"];
-            $sousCat = $_POST["sousCat"];
             $projectDate = date("Y-m-d H:i:s");
-            $query =$connect -> prepare("INSERT INTO projets (titre_projet, projet_description, id_categorie, id_sous_categorie, id_utilisateur, created_in) VALUES (?,?,?,?,?,?)");
-            $query -> bind_param("ssssss",$projectName,$projectDesc,$projectCat,$sousCat,$sessionID,$projectDate);
+            $query =$connect -> prepare("INSERT INTO projets (titre_projet, projet_description, id_categorie,  id_utilisateur, created_in) VALUES (?,?,?,?,?)");
+            $query -> bind_param("sssss",$projectName,$projectDesc,$projectCat,$sessionID,$projectDate);
            $query -> execute();
            echo "<div class='bg-green-500 text-white font-bold w-full py-4 text-center'>Project was added successfully</div>";
+           header("location: utilisateur.php");
+           exit;
         }
  ?>
   <!-- EDIT PROJECT -->
@@ -48,12 +49,12 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
         $editedName = $_POST["edit-name"];
         $editedDesc = $_POST["edit-desc"];
         $editCat = (int)$_POST["edit-cat"];
-        $editSubCat = (int)$_POST["editSousCat"];
         $projetId = $_POST["projectId"];
-        $editQuery = $connect -> prepare("UPDATE projets SET titre_projet = ?,projet_description = ?, id_categorie = ?, id_sous_categorie = ? WHERE id_projet = ?");
-        $editQuery -> bind_param("sssss",$editedName, $editedDesc, $editCat, $editSubCat, $projetId );
+        $editQuery = $connect -> prepare("UPDATE projets SET titre_projet = ?,projet_description = ?, id_categorie = ? WHERE id_projet = ?");
+        $editQuery -> bind_param("ssss",$editedName, $editedDesc, $editCat, $projetId );
         $editQuery -> execute();
-        
+        header("location: utilisateur.php");
+        exit;
     }
    ?>
    <!-- delete projet -->
@@ -61,6 +62,8 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
         if (isset($_GET["deletePr"])){
             $idDelete = (int)$_GET["deletePro"];
             $queryDel = $connect -> query("DELETE FROM projets WHERE id_projet = $idDelete");
+            header("location: utilisateur.php");
+            exit;
         }
     ?>
      <!-- nav bar  -->
@@ -182,7 +185,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
   <!--  -->
       <?php
     
-   if (isset($_POST["submit_search"])){ // search by project name
+   if (isset($_POST["submit_search"])){  // search by project name
     $search = $_POST["search"];
     $requet = $connect -> prepare("SELECT id_projet, titre_projet, projet_description, id_categorie, id_sous_categorie, created_in FROM projets where  titre_projet = ?");
     $requet -> bind_param("s",$search);
@@ -208,9 +211,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
         // categorie
         $getCat = $connect -> query("SELECT nom_categorie from categorie where id_categorie = {$projectsAsArr[$i]['id_categorie']}");
         $catPrint = $getCat -> fetch_assoc();
-        // sub categorie
-        $getSousCat = $connect -> query("SELECT nom_sous_categorie from sous_categorie where id_sous_categorie = {$projectsAsArr[$i]['id_sous_categorie']}");
-        $sousCatPrint = $getSousCat -> fetch_assoc();
+
         echo "
         <div class='bg-gray-100 shadow-md rounded-lg p-6 relative'>
         <div class='absolute top-0 right-0 flex'>
@@ -230,7 +231,6 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
         </p>
         <div class='text-sm text-gray-500'>
           <p><strong>Category:</strong> {$catPrint['nom_categorie']}</p>
-          <p><strong>Subcategory:</strong> {$sousCatPrint['nom_sous_categorie']}</p>
           <p><strong>Date:</strong> {$projectsAsArr[$i]['created_in']}</p>
         </div>
       </div>

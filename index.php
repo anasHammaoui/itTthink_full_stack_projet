@@ -29,9 +29,11 @@ if (isset($_POST["submit"])){
         exit;
         }
       } else {
-        echo "password incorrect";
+        echo "<div class='bg-rose-500 text-white font-bold text-lg text-center py-2'>Password incorrect</div>";
       }
       
+    } else {
+      echo "<div class='bg-rose-500 text-white font-bold text-lg text-center py-2'>Invalid Email</div>";
     }
   }
 ?>
