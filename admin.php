@@ -22,6 +22,11 @@
     header("location: index.php");
     exit;
   }
+
+
+  $showCats = $connect -> query("SELECT nom_categorie, id_categorie from categorie");
+  $showAllCats = $showCats -> fetch_all(MYSQLI_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,9 +54,12 @@
     </style>
 </head>
 <body>
-    <div class="flex h-screen bg-gray-100">
+    <div class="flex h-screen bg-gray-100 relative">
+        <div class="absolute top-4 right-3.5 berger block md:hidden" >
+        <i class="fa-solid fa-bars text-3xl cursor-pointer"></i>
+        </div>
         <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800">
+        <aside class="w-64 bg-gray-800  navbar hidden md:block">
             <div class="p-4 border-b border-gray-700">
                 <h2 class="text-xl font-bold text-white">Admin Dashboard</h2>
             </div>
@@ -64,18 +72,18 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#users" onclick="showSection('users')" class="nav-link block text-white hover:bg-gray-700 rounded p-2">
-                            Users Management
+                        <a href="#project" onclick="showSection('project')" class="nav-link block text-white hover:bg-gray-700 rounded p-2">
+                            Projects Manager
                         </a>
                     </li>
                     <li>
-                        <a href="#projects" onclick="showSection('projects')" class="nav-link block text-white hover:bg-gray-700 rounded p-2">
-                            Projects
+                        <a href="#Categories" onclick="showSection('Categories')" class="nav-link block text-white hover:bg-gray-700 rounded p-2">
+                            Categories
                         </a>
                     </li>
                     <li>
-                        <a href="#settings" onclick="showSection('settings')" class="nav-link block text-white hover:bg-gray-700 rounded p-2">
-                            Settings
+                        <a href="index.php" class="nav-link block text-white hover:bg-gray-700 rounded p-2">
+                            Sign Out
                         </a>
                     </li>
                 </ul>
@@ -90,14 +98,6 @@
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">Welcome back!</h1>
                         <p class="text-gray-600">Role: <?= $_SESSION["role"] ?></p>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <button class="p-2 hover:bg-gray-100 rounded-full">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                            </svg>
-                        </button>
-                        <div class="w-10 h-10 bg-gray-300 rounded-full"></div>
                     </div>
                 </div>
             </header>
@@ -133,14 +133,13 @@
                      $getProjects = $connect -> query($projectsQuery);
                      $projectsAsArr = $getProjects -> fetch_all(MYSQLI_ASSOC);
                   ?>
-                <section id="users" class="dashboard-section">
+                <section id="project" class="dashboard-section overflow-scroll">
                     <div class="bg-white rounded-lg shadow">
                         <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-                            <h2 class="text-xl font-semibold text-gray-900">Users Management</h2>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add New User</button>
+                            <h2 class="text-xl font-semibold text-gray-900">Projects Manager</h2>
                         </div>
                         <div class="p-4">
-                            <table class="min-w-full">
+                            <table class="min-w-full     bg-white">
                                 <thead>
                                     <tr class="bg-gray-50">
                                         <th class="text-left p-4">Id Project</th>
@@ -150,15 +149,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- <tr class="border-b">
-                                        <td class="p-4">John Doe</td>
-                                        <td class="p-4">Admin</td>
-                                        <td class="p-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded">Active</span></td>
-                                        <td class="p-4">
-                                            <button class="text-blue-500 hover:text-blue-700 mr-2">Edit</button>
-                                            <button class="text-red-500 hover:text-red-700">Delete</button>
-                                        </td>
-                                    </tr> -->
                                     <?php
                                       for ($i = 0; $i < count($projectsAsArr); $i++){ ?>
                                       <tr class="border-b">
@@ -206,7 +196,7 @@
                         <option value="Canceled">Canceled</option>
                       </select>
                     </div>   
-                        <input type="text" name="projectId" class="statusId">
+                        <input type="text" name="projectId" class="statusId hidden">
                     <input type="submit" value="Edit Status" name="editStatus" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 </form>
             </div>
@@ -227,52 +217,81 @@
         </div>
                 </section>
 
-                <!-- Projects Section -->
-                <section id="projects" class="dashboard-section">
+                <!-- Categories Section -->
+                <section id="Categories" class="dashboard-section">
                     <div class="bg-white rounded-lg shadow">
                         <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-                            <h2 class="text-xl font-semibold text-gray-900">Projects</h2>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Create Project</button>
+                            <h2 class="text-xl font-semibold text-gray-900">Categories</h2>
+                            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Create Category</button>
                         </div>
                         <div class="p-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <div class="border rounded p-4">
-                                    <h3 class="font-semibold">Website Redesign</h3>
-                                    <p class="text-gray-600 text-sm mt-1">Due: Dec 24, 2024</p>
+                           
+                              <?php
+                                for ($i = 0; $i < count($showAllCats); $i++) { ?>
+                                    <div class="border rounded p-4 mx-auto">
+                                    <h3 class="cat-name font-semibold text-center" data-idCat=<?= "{$showAllCats[$i]["id_categorie"]}" ?>><?= $showAllCats[$i]["nom_categorie"] ?></h3>
                                     <div class="mt-2">
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">In Progress</span>
+                                    <button class="edit-cat bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600" data-modal-target='edit-cat' data-modal-toggle='edit-cat' type='i'>Edit Categorie</button>
+                                    <button class="bg-rose-500 text-white px-3 py-1 rounded hover:bg-rose-600">Delete Categorie</button>
                                     </div>
                                 </div>
+                                <?php } ?>
+                               
                                 <!-- Add more project cards as needed -->
                             </div>
                         </div>
                     </div>
-                </section>
-
-                <!-- Settings Section -->
-                <section id="settings" class="dashboard-section">
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Settings</h2>
-                        <form>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Site Name</label>
-                                <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Email Notifications</label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
-                                    <span class="ml-2 text-gray-700">Enable email notifications</span>
-                                </label>
-                            </div>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Settings</button>
-                        </form>
-                    </div>
-                </section>
+                       <!-- edit status menu -->
+                       <div class="edit">
+<!-- Main modal -->
+<div id="edit-cat" tabindex="-1" aria-hidden="true" class="hidden  overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Edit Category
+                </h3>
+                <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="edit-cat">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5">
+                <form class="space-y-4 edit-project" action="admin.php" method="POST">
+                   
+                    <div>
+                      <label for="status">Enter New Category</label>
+                      <input type="text" name="newCat" class="newCat rounded">
+                    </div>   
+                        <input type="text" name="catId" class="catId hidden">
+                    <input type="submit" value="Edit Category" name="editCategory" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                </form>
+            </div>
+            <!-- edit status in php -->
+             <?php
+              if (isset($_POST["editCategory"])){
+                $editValue = $_POST["newCat"];
+                $editId = $_POST["catId"];
+                // die();
+                $query = $connect -> prepare("UPDATE categorie SET nom_categorie = ? WHERE id_categorie = ?");
+                $query -> bind_param("ss", $editValue, $editId );
+                $query -> execute();
+              }
+             ?>
+        </div>
+    </div>
+</div> 
+        </div>
+                                </section>
             </main>
         </div>
     </div>
-
     <script>
         function showSection(sectionId) {
             // Hide all sections
@@ -295,7 +314,28 @@
             const hash = window.location.hash.slice(1) || 'overview';
             showSection(hash);
         });
+        // ***************************Admin****************
+// edit status
+document.querySelectorAll(".editStatus").forEach(edit => {
+    edit.addEventListener("click", ()=>{
+        let idAtt = edit.parentNode.parentNode.querySelector(".idProject").textContent;
+        document.querySelector(".statusId").value = idAtt;
+    })
+})
+// admin navbar
+document.querySelector(".berger").addEventListener("click",()=>{
+    document.querySelector(".navbar").classList.toggle("hidden");
+    console.log("clicked");
+
+})
+// edit category
+document.querySelectorAll(".edit-cat").forEach(edit => {
+    edit.addEventListener("click", ()=>{
+        let idAtt = edit.parentNode.parentNode.querySelector(".cat-name").getAttribute("data-idCat");
+        document.querySelector(".newCat").value = edit.parentNode.parentNode.querySelector(".cat-name").textContent;
+        document.querySelector(".catId").value = idAtt;
+    })
+})
     </script>
-    <script src="js/script.js"></script>
 </body>
 </html>

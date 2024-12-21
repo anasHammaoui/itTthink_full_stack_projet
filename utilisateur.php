@@ -68,7 +68,6 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
     <h2 class="text-cyan-600 font-semibold text-xl">itThink</h2>
     <ul class="flex justify-between items-center gap-6">
     <li ><a href="index.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Log Out</a></li>
-      <li ><a href="signup.php" class="text-slate-900 font-bold text-lg hover:text-cyan-600 transition-all">Freelancer</a></li>
     </ul>
 </nav>
 <div class="page-header flex flex-col gap-4 md:flex-row py-4 bg-slate-300 md:justify-between px-4 md:px-6 md:items-center">
@@ -134,23 +133,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
            ?>
         </select>
                     </div>
-                    <!-- categorie -->
-                    <div class="flex justify-between items-center">
-                <label for="souCat" class="block  mr-7 font-medium text-gray-900 ">Sub category</label>
-        <select id="souCat" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="sousCat">
-           <?php
-            $getCats = "SELECT * FROM sous_categorie";
-            $catQuery = $connect -> query($getCats);
-            $getCatsAsArr = $catQuery -> fetch_all(MYSQLI_ASSOC);
-            for ($i=0; $i < count($getCatsAsArr);$i++) {
-                $catId = $getCatsAsArr[$i]["id_sous_categorie"];
-                $catName = $getCatsAsArr[$i]["nom_sous_categorie"];
-                echo "<option value='$catId'>$catName</option>";
-            }
-    
-           ?>
-        </select>
-                    </div>
+                   
                     <input type="submit" value="Add Project" name="addProject" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 </form>
             </div>
@@ -305,24 +288,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] !== "admin"){
            ?>
         </select>
                     </div>
-                      <!-- sub categorie -->
-                      <div class="flex justify-between items-center">
-                <label for="souCat" class="block  mr-7 font-medium text-gray-900 ">Sub category</label>
-        <select id="souCat" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " name="editSousCat">
-           <?php
-            $getCats = "SELECT * FROM sous_categorie";
-            $catQuery = $connect -> query($getCats);
-            $getCatsAsArr = $catQuery -> fetch_all(MYSQLI_ASSOC);
-            for ($i=0; $i < count($getCatsAsArr);$i++) {
-                $catId = $getCatsAsArr[$i]["id_sous_categorie"];
-                $catName = $getCatsAsArr[$i]["nom_sous_categorie"];
-                echo "<option value='$catId'>$catName</option>";
-            }
-
-           ?>
-        </select>
-                    </div>
-                        <input type="text" name="projectId" class=" putId">
+                        <input type="text" name="projectId" class="hidden putId">
                     <input type="submit" value="Edit Project" name="editProject" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 </form>
             </div>

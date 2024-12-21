@@ -9,11 +9,3 @@ document.querySelectorAll(".edit-pro").forEach(icon =>{
     })
 })
 
-// ***************************Admin****************
-
-document.querySelectorAll(".editStatus").forEach(edit => {
-    edit.addEventListener("click", ()=>{
-        let idAtt = edit.parentNode.parentNode.querySelector(".idProject").textContent;
-        document.querySelector(".statusId").value = idAtt;
-    })
-})
